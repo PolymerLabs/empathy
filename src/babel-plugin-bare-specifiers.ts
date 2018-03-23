@@ -1,0 +1,1 @@
+../node_modules/polymer-build/src/babel-plugin-bare-specifiers.ts
