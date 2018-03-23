@@ -1,10 +1,13 @@
 {
   "name": "@0xcda7a/empathy",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Installing NPM modules for your front-end project? Pathify them with Empathy.",
   "main": "lib/index.js",
   "bin": "bin/empathy",
-  "files": ["lib/"],
+  "files": [
+    "lib/",
+    "bin/"
+  ],
   "scripts": {},
   "repository": {
     "type": "git",
@@ -20,6 +23,7 @@
     "@types/babel-core": "^6.25.3",
     "@types/babel-traverse": "^6.25.3",
     "@types/babel-types": "^7.0.1",
+    "@types/command-line-args": "^4.0.2",
     "@types/fs-extra": "^5.0.1",
     "@types/is-windows": "^0.2.0",
     "@types/node": "^9.6.0",
@@ -35,6 +39,7 @@
     "babel-plugin-syntax-export-extensions": "^6.13.0",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
     "babel-traverse": "^6.26.0",
+    "command-line-args": "^5.0.2",
     "fs-extra": "^5.0.0",
     "is-windows": "^1.0.2",
     "path-is-inside": "^1.0.2",
