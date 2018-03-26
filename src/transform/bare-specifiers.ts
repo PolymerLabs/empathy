@@ -1,19 +1,12 @@
 import * as babelCore from 'babel-core';
 import * as File from 'vinyl';
 import { Transform } from 'stream';
-import { resolveBareSpecifiers } from './babel-plugin-bare-specifiers.js';
-import { transformStream } from './stream.js';
-import { getFileContents } from './file.js';
+import { resolveBareSpecifiers } from '../babel-plugin-bare-specifiers.js';
+import { babelSyntaxPlugins } from '../babel-syntax-plugins.js';
+import { transformStream } from '../stream.js';
+import { getFileContents } from '../file.js';
 
-const babelSyntaxPlugins = [
-  require('babel-plugin-syntax-exponentiation-operator'),
-  require('babel-plugin-syntax-async-functions'),
-  require('babel-plugin-syntax-async-generators'),
-  require('babel-plugin-syntax-export-extensions'),
-  require('babel-plugin-syntax-dynamic-import'),
-];
-
-export const bareSpecifiersTransform = (): Transform =>
+export const bareToPathSpecifiersTransform = (): Transform =>
     transformStream<File, File>(async (file: File): Promise<File> => {
       const plugins = [
         ...babelSyntaxPlugins,

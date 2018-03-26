@@ -1,30 +1,48 @@
-import { relative, join } from 'path';
-import { applyEmpathy } from './empathy.js';
+import { resolve, relative } from 'path';
+import { applyEmpathy, reverseEmpathy } from './empathy.js';
 import * as commandLineArgs from 'command-line-args';
 
 const cwd = process.cwd();
 const optionDefinitions = [{
-  name: 'out',
-  alias: 'o',
+  name: 'assets-directory',
+  alias: 'a',
   type: String,
   multiple: false,
-  defaultOption: true,
-  defaultValue: join(cwd, 'assets')
+  defaultValue: 'assets'
+}, {
+  name: 'dist-directory',
+  alias: 'd',
+  type: String,
+  mulitple: false,
+  defaultValue: 'dist'
+}, {
+  name: 'reverse',
+  alias: 'r',
+  type: String,
+  multiple: true
 }];
 
 const options = commandLineArgs(optionDefinitions);
-const { out } = options;
+const { reverse } = options;
+const assetsDirectory = resolve(cwd, options['assets-directory']);
+const distDirectory = resolve(cwd, options['dist-directory']);
 
-const manifestPath = join(cwd, 'package.json');
-const manifest = require(manifestPath);
-const { assetDependencies } = manifest;
+if (reverse == null) {
+  const outputDirectory = assetsDirectory;
+  const prettyOutPath = relative(cwd, outputDirectory);
 
-if (assetDependencies == null) {
-  console.log('No asset dependencies listed in package.json.');
-  process.exit(0);
+  applyEmpathy(outputDirectory).then(() => {
+    console.log(`Assets installed to "${prettyOutPath}" 🖖`);
+  }).catch(error => {
+    console.error(error);
+  });
 } else {
-  applyEmpathy(assetDependencies, out).then(() => {
-    console.log(`Assets installed to "${relative(cwd, out)}" 🖖`);
+  const outputDirectory = distDirectory;
+  const prettyOutPath = relative(cwd, outputDirectory);
+
+  reverseEmpathy(reverse, assetsDirectory, outputDirectory).then(() => {
+    console.log(
+        `Artifacts with name specifiers placed in "${prettyOutPath}" 🖖`);
   }).catch(error => {
     console.error(error);
   });
