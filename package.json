@@ -41,6 +41,7 @@
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
     "babel-traverse": "^6.26.0",
     "command-line-args": "^5.0.2",
+    "command-line-usage": "^5.0.4",
     "find-root": "^1.1.0",
     "fs-extra": "^5.0.0",
     "is-windows": "^1.0.2",

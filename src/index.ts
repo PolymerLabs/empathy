@@ -1,50 +1,39 @@
-import { resolve, relative } from 'path';
+import { relative } from 'path';
 import { applyEmpathy, reverseEmpathy } from './empathy.js';
-import * as commandLineArgs from 'command-line-args';
+import { getCommand, InstallOptions, PublishOptions } from './command.js';
 
-const cwd = process.cwd();
-const optionDefinitions = [{
-  name: 'assets-directory',
-  alias: 'a',
-  type: String,
-  multiple: false,
-  defaultValue: 'assets'
-}, {
-  name: 'dist-directory',
-  alias: 'd',
-  type: String,
-  mulitple: false,
-  defaultValue: 'dist'
-}, {
-  name: 'reverse',
-  alias: 'r',
-  type: String,
-  multiple: true
-}];
+const command = getCommand();
 
-const options = commandLineArgs(optionDefinitions);
-const { reverse } = options;
-const assetsDirectory = resolve(cwd, options['assets-directory']);
-const distDirectory = resolve(cwd, options['dist-directory']);
+switch (command.name) {
+  case 'install': {
+    const { assetsDirectory } = command.options as InstallOptions;
 
-if (reverse == null) {
-  const outputDirectory = assetsDirectory;
-  const prettyOutPath = relative(cwd, outputDirectory);
+    applyEmpathy(assetsDirectory).then(() => {
+      const prettyOutPath = relative(process.cwd(), assetsDirectory);
+      console.log(`Assets installed to "${prettyOutPath}" 🖖`);
+    }).catch(error => {
+      console.error(error);
+    });
 
-  applyEmpathy(outputDirectory).then(() => {
-    console.log(`Assets installed to "${prettyOutPath}" 🖖`);
-  }).catch(error => {
-    console.error(error);
-  });
-} else {
-  const outputDirectory = distDirectory;
-  const prettyOutPath = relative(cwd, outputDirectory);
+    break;
+  }
 
-  reverseEmpathy(reverse, assetsDirectory, outputDirectory).then(() => {
-    console.log(
-        `Artifacts with name specifiers placed in "${prettyOutPath}" 🖖`);
-  }).catch(error => {
-    console.error(error);
-  });
+  case 'publish': {
+    const {
+      sources,
+      assetsDirectory,
+      distDirectory
+    } = command.options as PublishOptions;
+
+    reverseEmpathy(sources, assetsDirectory, distDirectory).then(() => {
+      const prettyOutPath = relative(process.cwd(), distDirectory);
+      console.log(
+          `Artifacts with name specifiers placed in "${prettyOutPath}" 🖖`);
+    }).catch(error => {
+      console.error(error);
+    });
+
+    break;
+  }
 }
 
