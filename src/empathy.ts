@@ -12,11 +12,33 @@ const cwd = process.cwd();
 const copy = promisify(fsExtra.copy);
 
 export const applyEmpathy =
-    async (outputFolder: string): Promise<void> => {
+    async (outputFolder: string, includes: string[], excludes: string[])
+        : Promise<void> => {
 
       const manifestPath = join(cwd, 'package.json');
       const manifest = require(manifestPath);
-      const { assetDependencies } = manifest;
+      const { dependencies } = manifest;
+
+      // Compute asset dependencies from package manifest dependencies.
+      // If includes are specified, only those packages will be considered.
+      // Packages explicitly listed in excludes will not be considered.
+      const assetDependencies = Object.keys(dependencies || {}).reduce(
+          (assetDependencies, key) => {
+            let allowed = true;
+
+            if (includes.length) {
+              allowed = includes.indexOf(key) > -1;
+            }
+
+            allowed = allowed && excludes.indexOf(key) === -1;
+
+            if (allowed) {
+              assetDependencies[key] = dependencies[key];
+            }
+
+            return assetDependencies;
+          }, {} as { [index: string]: string });
+
       let assetStagePath: string;
 
       try {

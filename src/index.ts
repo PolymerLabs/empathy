@@ -6,9 +6,13 @@ const command = getCommand();
 
 switch (command.name) {
   case 'install': {
-    const { assetsDirectory } = command.options as InstallOptions;
+    const {
+      assetsDirectory,
+      only,
+      ignore
+    } = command.options as InstallOptions;
 
-    applyEmpathy(assetsDirectory).then(() => {
+    applyEmpathy(assetsDirectory, only, ignore).then(() => {
       const prettyOutPath = relative(process.cwd(), assetsDirectory);
       console.log(`Assets installed to "${prettyOutPath}" 🖖`);
     }).catch(error => {

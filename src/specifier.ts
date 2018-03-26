@@ -10,14 +10,6 @@ const readFile = promisify(fs.readFile);
 export const ensureDirectoryWithinPath = (path: string) =>
     (directory: string): boolean => {
       const relativePath = relative(path, directory);
-      //console.log(' ');
-      //console.log(path);
-      //console.log(directory);
-      //console.log(relativePath);
-      //console.log(!!relativePath, !relativePath.startsWith('.'), fs.existsSync(join(directory, 'package.json')));
-      //console.log(' ');
-      //console.log('⤴️ ');
-      //console.log(' ');
       return !!(relativePath && !relativePath.startsWith('.'));
     };
 
@@ -26,8 +18,7 @@ export const ensureManifestWithinPath = (path: string) => {
   return (directory: string): boolean => {
     return testDirectory && fs.existsSync(join(directory, 'package.json'));
   }
-}
-
+};
 
 export const detectBareSpecifierForPath =
     async (filePath: string, searchWithinPath: string = process.cwd())

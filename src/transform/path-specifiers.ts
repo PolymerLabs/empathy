@@ -103,14 +103,16 @@ export const pathToBareSpecifiersTransform =
                 console.log(`Adjusting specifier '${originalSpecifier}'
   New value: ${specifier.value}`);
               } catch (error) {
-                console.log(`Failed to adjust specifier '${originalSpecifier}'`);
+                console.log(
+                    `Failed to adjust specifier '${originalSpecifier}'`);
                 console.error(error);
               }
             }
 
-            const transformedScriptSource = babelCore.transformFromAst(ast, undefined, {
-              plugins: [...babelSyntaxPlugins]
-            }).code!;
+            const transformedScriptSource =
+                babelCore.transformFromAst(ast, undefined, {
+                  plugins: [...babelSyntaxPlugins]
+                }).code!;
 
             file.contents = Buffer.from(transformedScriptSource);
           } catch (error) {

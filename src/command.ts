@@ -7,7 +7,7 @@ const commandLineUsage: (...args: any[]) => string =
 export interface InstallOptions {
   assetsDirectory: string;
   only: string[];
-  exclude: string[];
+  ignore: string[];
 };
 
 export interface PublishOptions {
@@ -141,7 +141,7 @@ export const getCommand = (): Command => {
       options = {
         assetsDirectory: resolve(cwd, parsed['assets-directory']),
         only: parsed.only || [],
-        exclude: parsed.exclude || []
+        ignore: parsed.ignore || []
       };
 
       break;
