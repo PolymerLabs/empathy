@@ -22,6 +22,7 @@ export interface InstallOptions {
   assetsDirectory: string;
   only: string[];
   ignore: string[];
+  evenAsDependency: boolean;
 };
 
 export interface PublishOptions {
@@ -51,9 +52,15 @@ const installDefinitions = [{
 }, {
   name: 'ignore',
   description: 'List of dependency package names to ignore (includes others)',
-  alias: 'e',
+  alias: 'i',
   type: String,
   multiple: true
+}, {
+  name: 'even-as-dependency',
+  description: 'Run even if package is installed as an NPM dependency. Defaults to false.',
+  alias: 'e',
+  type: Boolean,
+  defaultValue: false
 }];
 
 const publishDefinitions = [{
@@ -113,7 +120,7 @@ const installUsage = commandLineUsage([{
   content: 'Installs NPM packages as assets to a local directory. Assets have their module specifiers "fixed" as browser-compatible path specifiers.'
 }, {
   header: 'Usage',
-  content: '$ empathy install [-a <directory>] [-o <packages>] [-e <packages>]'
+  content: '$ empathy install [-a <directory>] [-o <packages>] [-i <packages>] [-e]'
 }, {
   header: 'Options',
   optionList: installDefinitions
@@ -155,7 +162,8 @@ export const getCommand = (): Command => {
       options = {
         assetsDirectory: resolve(cwd, parsed['assets-directory']),
         only: parsed.only || [],
-        ignore: parsed.ignore || []
+        ignore: parsed.ignore || [],
+        evenAsDependency: !!parsed['even-as-dependency']
       };
 
       break;

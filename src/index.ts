@@ -23,15 +23,24 @@ switch (command.name) {
     const {
       assetsDirectory,
       only,
-      ignore
+      ignore,
+      evenAsDependency
     } = command.options as InstallOptions;
 
-    applyEmpathy(assetsDirectory, only, ignore).then(() => {
-      const prettyOutPath = relative(process.cwd(), assetsDirectory);
-      console.log(`Assets installed to "${prettyOutPath}" 🖖`);
-    }).catch(error => {
-      console.error(error);
-    });
+    const initCwd = process.env['INIT_CWD'];
+    const isDependency = initCwd != null && initCwd !== process.cwd();
+    const shouldRunInstall = !isDependency || evenAsDependency;
+
+    if (shouldRunInstall) {
+      applyEmpathy(assetsDirectory, only, ignore).then(() => {
+        const prettyOutPath = relative(process.cwd(), assetsDirectory);
+        console.log(`Assets installed to "${prettyOutPath}" 🖖`);
+      }).catch(error => {
+        console.error(error);
+      });
+    } else {
+      process.exit(0);
+    }
 
     break;
   }
