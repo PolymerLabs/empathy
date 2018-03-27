@@ -13,24 +13,17 @@
  */
 
 import * as babelCore from 'babel-core';
+import {NodePath} from 'babel-traverse';
+import {ExportAllDeclaration, ExportNamedDeclaration, ImportDeclaration} from 'babel-types';
+import {dirname, join, relative} from 'path';
+import {Transform} from 'stream';
 import * as File from 'vinyl';
 import * as vfs from 'vinyl-fs';
-import { join, relative, dirname } from 'path';
-import { Transform } from 'stream';
-import { babelSyntaxPlugins } from '../babel-syntax-plugins.js';
-import { transformStream } from '../stream.js';
-import { getFileContents } from '../file.js';
-import {
-  ensureDirectoryWithinPath,
-  detectBareSpecifierForFile
-} from '../specifier.js';
 
-import { NodePath } from 'babel-traverse';
-import {
-  ImportDeclaration,
-  ExportNamedDeclaration,
-  ExportAllDeclaration
-} from 'babel-types';
+import {babelSyntaxPlugins} from '../babel-syntax-plugins.js';
+import {getFileContents} from '../file.js';
+import {detectBareSpecifierForFile, ensureDirectoryWithinPath} from '../specifier.js';
+import {transformStream} from '../stream.js';
 
 const exportExtensions = require('babel-plugin-syntax-export-extensions');
 
@@ -41,7 +34,8 @@ export const SpecifierVisitor =
     'ImportDeclaration|ExportNamedDeclaration|ExportAllDeclaration';
 
 export class SpecifierProxy {
-  constructor(protected node: HasSpecifier) {}
+  constructor(protected node: HasSpecifier) {
+  }
 
   get value(): string {
     return this.node.source.value;
@@ -58,7 +52,7 @@ export const collectSpecifiers = (specifierCallback: SpecifierCallback) => ({
   inherits: exportExtensions,
   visitor: {
     [SpecifierVisitor](path: NodePath<HasSpecifier>) {
-      const { node } = path;
+      const {node} = path;
 
       if (node.source == null) {
         return;
@@ -69,72 +63,68 @@ export const collectSpecifiers = (specifierCallback: SpecifierCallback) => ({
   }
 });
 
-export const pathToBareSpecifiersTransform =
-    (assetsDirectory: string): Transform => transformStream<File, File>(
-        async (file: File): Promise<File> => {
-          const cwd = process.cwd();
+export const pathToBareSpecifiersTransform = (assetsDirectory:
+                                                  string): Transform =>
+    transformStream<File, File>(async(file: File): Promise<File> => {
+      const cwd = process.cwd();
 
-          const scriptSource = await getFileContents(file);
-          const relativePath = relative(cwd, file.path);
-          const isWithinAssetsFolder =
-              ensureDirectoryWithinPath(assetsDirectory);
+      const scriptSource = await getFileContents(file);
+      const relativePath = relative(cwd, file.path);
+      const isWithinAssetsFolder = ensureDirectoryWithinPath(assetsDirectory);
 
-          try {
-            console.log(`Applying reverse empathy to ${relativePath}`);
+      try {
+        console.log(`Applying reverse empathy to ${relativePath}`);
 
-            const specifiers: SpecifierProxy[] = [];
-            const { ast } = babelCore.transform(scriptSource, {
-              plugins: [
-                ...babelSyntaxPlugins,
-                collectSpecifiers(specifier => specifiers.push(specifier))
-              ]
-            });
-            const fileDirectory = dirname(file.path);
+        const specifiers: SpecifierProxy[] = [];
+        const {ast} = babelCore.transform(scriptSource, {
+          plugins: [
+            ...babelSyntaxPlugins,
+            collectSpecifiers(specifier => specifiers.push(specifier))
+          ]
+        });
+        const fileDirectory = dirname(file.path);
 
-            for (const specifier of specifiers) {
-              const specifierFilePath = join(fileDirectory, specifier.value);
+        for (const specifier of specifiers) {
+          const specifierFilePath = join(fileDirectory, specifier.value);
 
-              if (!isWithinAssetsFolder(specifierFilePath)) {
-                continue;
-              }
-
-              const originalSpecifier = specifier.value;
-
-              try {
-                specifier.value =
-                    await new Promise<string>((resolve, reject) => {
-                      vfs.src([specifierFilePath])
-                          .on('error', reject)
-                          .on('data', async (file: File) => {
-                            try {
-                              resolve(await detectBareSpecifierForFile(file,
-                                  assetsDirectory));
-                            } catch (error) {
-                              reject(error);
-                            }
-                          });
-                    });
-                console.log(`Adjusting specifier '${originalSpecifier}'
-  New value: ${specifier.value}`);
-              } catch (error) {
-                console.log(
-                    `Failed to adjust specifier '${originalSpecifier}'`);
-                console.error(error);
-              }
-            }
-
-            const transformedScriptSource =
-                babelCore.transformFromAst(ast, undefined, {
-                  plugins: [...babelSyntaxPlugins]
-                }).code!;
-
-            file.contents = Buffer.from(transformedScriptSource);
-          } catch (error) {
-            console.error(`Failed to transform specifiers in ${relativePath}`);
-            console.error(error);
+          if (!isWithinAssetsFolder(specifierFilePath)) {
+            continue;
           }
 
-          return file;
-        });
+          const originalSpecifier = specifier.value;
 
+          try {
+            specifier.value = await new Promise<string>((resolve, reject) => {
+              vfs.src([specifierFilePath])
+                  .on('error', reject)
+                  .on('data', async (file: File) => {
+                    try {
+                      resolve(await detectBareSpecifierForFile(
+                          file, assetsDirectory));
+                    } catch (error) {
+                      reject(error);
+                    }
+                  });
+            });
+            console.log(`Adjusting specifier '${originalSpecifier}'
+  New value: ${specifier.value}`);
+          } catch (error) {
+            console.log(`Failed to adjust specifier '${originalSpecifier}'`);
+            console.error(error);
+          }
+        }
 
+        const transformedScriptSource =
+            babelCore
+                .transformFromAst(
+                    ast, undefined, {plugins: [...babelSyntaxPlugins]})
+                .code!;
+
+        file.contents = Buffer.from(transformedScriptSource);
+      } catch (error) {
+        console.error(`Failed to transform specifiers in ${relativePath}`);
+        console.error(error);
+      }
+
+      return file;
+    });

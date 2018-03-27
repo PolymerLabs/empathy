@@ -12,15 +12,16 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import { transformStream } from '../stream.js';
-import { getFileContents } from '../file.js';
-import { Transform } from 'stream';
-import { detectBareSpecifierForPath } from '../specifier.js';
+import {Transform} from 'stream';
 import * as File from 'vinyl';
+
+import {getFileContents} from '../file.js';
+import {detectBareSpecifierForPath} from '../specifier.js';
+import {transformStream} from '../stream.js';
 
 export const resolutionMarkerTransform =
     (searchWithinPath?: string): Transform =>
-        transformStream<File, File>(async (file: File): Promise<File> => {
+        transformStream<File, File>(async(file: File): Promise<File> => {
           try {
             const bareSpecifier =
                 await detectBareSpecifierForPath(file.path, searchWithinPath);

@@ -13,19 +13,18 @@
  */
 
 import * as babelCore from 'babel-core';
+import {Transform} from 'stream';
 import * as File from 'vinyl';
-import { Transform } from 'stream';
-import { resolveBareSpecifiers } from '../babel-plugin-bare-specifiers.js';
-import { babelSyntaxPlugins } from '../babel-syntax-plugins.js';
-import { transformStream } from '../stream.js';
-import { getFileContents } from '../file.js';
+
+import {resolveBareSpecifiers} from '../babel-plugin-bare-specifiers.js';
+import {babelSyntaxPlugins} from '../babel-syntax-plugins.js';
+import {getFileContents} from '../file.js';
+import {transformStream} from '../stream.js';
 
 export const bareToPathSpecifiersTransform = (): Transform =>
-    transformStream<File, File>(async (file: File): Promise<File> => {
-      const plugins = [
-        ...babelSyntaxPlugins,
-        resolveBareSpecifiers(file.path, false)
-      ];
+    transformStream<File, File>(async(file: File): Promise<File> => {
+      const plugins =
+          [...babelSyntaxPlugins, resolveBareSpecifiers(file.path, false)];
 
       const scriptSource = await getFileContents(file);
 
@@ -36,7 +35,7 @@ export const bareToPathSpecifiersTransform = (): Transform =>
         console.log(`Applying empathy to ${relativePath}`);
 
         const transformedScriptSource =
-            babelCore.transform(scriptSource, { plugins }).code!;
+            babelCore.transform(scriptSource, {plugins}).code!;
 
         file.contents = Buffer.from(transformedScriptSource);
       } catch (error) {
@@ -46,4 +45,3 @@ export const bareToPathSpecifiersTransform = (): Transform =>
 
       return file;
     });
-
