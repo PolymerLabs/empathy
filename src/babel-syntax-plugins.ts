@@ -18,4 +18,5 @@ export const babelSyntaxPlugins = [
   require('babel-plugin-syntax-async-generators'),
   require('babel-plugin-syntax-export-extensions'),
   require('babel-plugin-syntax-dynamic-import'),
+  require('babel-plugin-syntax-object-rest-spread')
 ];
