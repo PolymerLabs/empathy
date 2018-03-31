@@ -1,6 +1,6 @@
 {
   "name": "@0xcda7a/empathy",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Installing NPM modules for your front-end project? Pathify them with Empathy.",
   "main": "lib/index.js",
   "bin": "bin/empathy",

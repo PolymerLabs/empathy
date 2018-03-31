@@ -20,6 +20,7 @@ import * as vfs from 'vinyl-fs';
 
 import {assetStage} from './asset-stage.js';
 import {bareToPathSpecifiersTransform} from './transform/bare-specifiers.js';
+import {injectProcessModuleTransform} from './transform/inject-process-module.js';
 import {pathToBareSpecifiersTransform} from './transform/path-specifiers.js';
 import {resolutionMarkerTransform} from './transform/resolution-markers.js';
 
@@ -69,9 +70,11 @@ export const applyEmpathy = async(
                 vfs.src(
                        [`${assetStagePath}${sep}**${sep}*.js`],
                        {cwd: assetStagePath})
-                    .pipe(bareToPathSpecifiersTransform())
+                    .pipe(injectProcessModuleTransform())
                     .on('error', reject)
                     .pipe(resolutionMarkerTransform(assetStagePath))
+                    .on('error', reject)
+                    .pipe(bareToPathSpecifiersTransform())
                     .on('error', reject)
                     .pipe(vfs.dest(assetStagePath))
                     .on('error', reject)
