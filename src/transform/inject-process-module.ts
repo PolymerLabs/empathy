@@ -79,7 +79,7 @@ export const injectProcessModuleTransform = (): Transform => {
             relative(dirname(file.path), processModuleFile!.path);
         console.log(
             `Prepending "process" module to ${relative(file.cwd, file.path)}`);
-        file.contents = Buffer.from(`import { process } from '${relativePath}';
+        file.contents = Buffer.from(`import { process } from '${relativePath.replace(/\\/g, '/')}';
 ${contents}`);
       }
     }
