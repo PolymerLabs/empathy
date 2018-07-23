@@ -29,7 +29,7 @@ export const bareToPathSpecifiersTransform = (): Transform =>
       const scriptSource = await getFileContents(file);
 
       try {
-        const pathParts = file.path.split('node_modules/');
+        const pathParts = file.path.split('node_modules');
         const relativePath = pathParts[1];
 
         console.log(`Applying empathy to ${relativePath}`);
